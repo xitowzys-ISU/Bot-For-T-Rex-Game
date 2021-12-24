@@ -1,52 +1,28 @@
 import cv2
+import pyautogui
 import numpy as np
 from mss import mss
-from PIL import Image
 
-from skimage import io
-from skimage.feature import match_template
+mon = {"top": 210, "left": 60, "width": 605, "height": 120}
+pyautogui.PAUSE = 0
+right, left = 140, 72
 
+sct = mss()
 
-class Object:
-    def __init__(self, path: str):
-        self.img = io.imread(path)
-        self.location = None
+while True:
+    img = cv2.cvtColor(np.array(sct.grab(mon)), cv2.COLOR_BGRA2GRAY)
+    img = cv2.resize(img, (500, 120))
 
-    def detect_object(self, image):
-        result = match_template(image, self.img)
+    if 83 in img[88, left:right]:
+        pyautogui.keyUp('down')
+        pyautogui.keyDown('up')
 
-        ij = np.unravel_index(np.argmax(result), result.shape)
-        _, x, y = ij[::-1]
-        hcoin, wcoin, _ = player.img.shape
+    else:
+        pyautogui.keyUp('up')
+        pyautogui.keyDown('down')
 
-        self.location = [(x, y), (x + wcoin, y + hcoin)]
+    cv2.imshow("Dino BOT", img[88:100, left:right])
 
-
-def grab_screen(mss_object, bbox: dict[str, int]) -> np.ndarray:
-    sct_img = mss_object.grab(monitor=bbox)
-
-    img = Image.frombytes('RGB', (sct_img.size.width, sct_img.size.height), sct_img.rgb)
-    img_bgr = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-
-    return img_bgr
-
-
-if __name__ == "__main__":
-
-    player: Object = Object('./objects/dino_day.png')
-
-    mon = {"top": -888, "left": 610, "width": 605, "height": 132}
-    sct = mss()
-
-    while True:
-        # monitor_1 = sct.monitors[1]
-        image = grab_screen(sct, mon)
-        player.detect_object(image)
-
-        image = cv2.rectangle(image, player.location[0], player.location[1], (0, 255, 0), 2)
-        cv2.imshow('test', image)
-
-        if cv2.waitKey(28) & 0xFF == ord('q'):
-            # cv2.imwrite('dino_game.png', image)
-            cv2.destroyAllWindows()
-            break
+    if cv2.waitKey(25) & 0xFF == ord("q"):
+        cv2.destroyAllWindows()
+        break
